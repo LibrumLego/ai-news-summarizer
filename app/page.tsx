@@ -4,29 +4,41 @@ import { useState } from "react";
 import Image from "next/image";
 
 export default function Home() {
-  // 상태 관리: 뉴스 제목, 요약 내용, 로딩 상태
   const [news, setNews] = useState({ title: "", summary: "" });
   const [loading, setLoading] = useState(false);
 
   const fetchAiSummary = async () => {
     setLoading(true);
     try {
-      // ⭐ 팀장님의 람다 URL을 여기에 붙여넣으세요!
       const LAMBDA_URL = "https://v4xrn4xija7ewrclywuizj37ya0ctxmq.lambda-url.us-east-1.on.aws/";
       
       const response = await fetch(LAMBDA_URL);
-      const data = await response.json();
       
-      // 람다가 보낸 body는 string 형태이므로 JSON으로 한 번 더 파싱
-      const result = JSON.parse(data.body);
+      if (!response.ok) {
+        throw new Error(`서버 응답 에러: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("받은 데이터:", data); // 터미널/콘솔 확인용
+
+      // 데이터 파싱 방어 로직: 
+      // 람다 설정에 따라 데이터가 body 안에 문자열로 올 수도 있고, 바로 객체로 올 수도 있습니다.
+      let result;
+      if (data.body) {
+        // body가 문자열이면 파싱, 아니면 그대로 사용
+        result = typeof data.body === 'string' ? JSON.parse(data.body) : data.body;
+      } else {
+        result = data;
+      }
 
       setNews({
-        title: result.title,
-        summary: result.summary,
+        title: result.title || "제목을 가져오지 못했습니다.",
+        summary: result.summary || "요약 내용을 가져오지 못했습니다.",
       });
+
     } catch (error) {
       console.error("데이터 가져오기 실패:", error);
-      alert("뉴스를 가져오는 중에 에러가 발생했습니다.");
+      alert("뉴스를 가져오는 중에 에러가 발생했습니다. 브라우저 콘솔을 확인해주세요.");
     } finally {
       setLoading(false);
     }
@@ -60,7 +72,6 @@ export default function Home() {
           {loading ? "AI가 요약 중..." : "최신 뉴스 요약하기"}
         </button>
 
-        {/* 결과창: 제목과 요약이 있을 때만 표시 */}
         {news.title && (
           <div className="mt-4 flex flex-col gap-4 border-t border-zinc-100 pt-8 dark:border-zinc-800 animate-in fade-in duration-500">
             <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">

@@ -9,6 +9,7 @@ export default function Home() {
   const [news, setNews] = useState({ title: "", summary: "" });
   const [loading, setLoading] = useState(false);
 
+  // 사용자가 입력한 뉴스 URL을 AWS Lambda로 보내 AI 요약 결과를 받아오는 함수
   const fetchAiSummary = async () => {
     if (!inputUrl.trim()) {
       alert("요약할 뉴스 기사의 URL을 입력해주세요!");

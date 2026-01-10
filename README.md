@@ -23,3 +23,6 @@ cd ai-news-summarizer
 
 # 3. 노드 패키지(라이브러리) 설치
 npm install
+
+# 4. 실행방법
+npm run dev
